@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  referer_proxy:
+    container_name: referer_proxy
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /etc/letsencrypt/live/service.icecorp.ru-0001/fullchain.pem:/app/ssl_cert.pem
+      - /etc/letsencrypt/live/service.icecorp.ru-0001/privkey.pem:/app/ssl_pkey.pem
+    command: ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "app:app", "--bind", "0.0.0.0:8080", "--timeout", "1800", "--keyfile=./ssl_pkey.pem", "--certfile=./ssl_cert.pem"]
